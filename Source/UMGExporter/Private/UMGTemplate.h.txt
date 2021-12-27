@@ -1,0 +1,14 @@
+﻿#pragma once
+
+#include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "{{WidgetClassName}}.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class U{{WidgetClassName}} : public UUserWidget
+{
+	GENERATED_BODY(){{InsertContent}}
+};
