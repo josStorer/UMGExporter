@@ -6,6 +6,8 @@
 #include "UMGExporterHelper.h"
 #include "Blueprint/WidgetTree.h"
 #include "Misc/FileHelper.h"
+#include "ISettingsModule.h"
+#include "UMGExporter_Setting.h"
 
 #define LOCTEXT_NAMESPACE "FUMGExporterModule"
 typedef FUMGExporterHelper Helper;
@@ -21,6 +23,14 @@ void FUMGExporterModule::StartupModule()
 
 	UToolMenus::RegisterStartupCallback(
 		FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FUMGExporterModule::RegisterMenus));
+
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->RegisterSettings("Project", "Plugins", "UMGExporter",
+		                                 LOCTEXT("RuntimeSettingsName", "UMGExporter"),
+		                                 LOCTEXT("RuntimeSettingsDescription", "Configure UMGExporter plugin"),
+		                                 GetMutableDefault<UUMGExporter_Setting>());
+	}
 }
 
 void FUMGExporterModule::ShutdownModule()
@@ -35,6 +45,11 @@ void FUMGExporterModule::ShutdownModule()
 	FUMGExporterStyle::Shutdown();
 
 	FUMGExporterCommands::Unregister();
+
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->UnregisterSettings("Project", "Plugins", "UMGExporter_Settings");
+	}
 }
 
 void FUMGExporterModule::RegisterMenus()
@@ -133,10 +148,15 @@ FString FUMGExporterModule::GenerateBindWidgetCode(UWidgetBlueprint* WidgetBluep
 
 FString FUMGExporterModule::GetGeneratedFilePathWithoutExtension(UWidgetBlueprint* WidgetBlueprint)
 {
+	auto Setting = GetMutableDefault<UUMGExporter_Setting>();
+	FPaths::NormalizeDirectoryName(Setting->ContentSourcePath.Path);
+	FPaths::NormalizeDirectoryName(Setting->ExportTargetPath.Path);
+	FPaths::RemoveDuplicateSlashes(Setting->ContentSourcePath.Path);
+	FPaths::RemoveDuplicateSlashes(Setting->ExportTargetPath.Path);
+
 	FString GenFileWithoutExt;
 	{
-		static FString ProjectDirPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir());
-		static FString ContentDirPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir());
+		FString ContentSourcePath = Setting->ContentSourcePath.Path + "/";
 		FString AssetName = Helper::BPToCppName(WidgetBlueprint->GetName());
 		FString AssetPath = FPaths::ConvertRelativePathToFull(
 			FPackageName::LongPackageNameToFilename(WidgetBlueprint->GetPathName()));
@@ -145,7 +165,8 @@ FString FUMGExporterModule::GetGeneratedFilePathWithoutExtension(UWidgetBlueprin
 		AssetPath.FindLastChar('/', LastAssetSeparatorIndex);
 		FString AssetFolder = AssetPath.Left(LastAssetSeparatorIndex);
 
-		FString GeneratedFileFolder = ProjectDirPath + "Source/" + AssetFolder.Replace(*ContentDirPath, TEXT(""));
+		FString GeneratedFileFolder = Setting->ExportTargetPath.Path + "/" +
+			AssetFolder.Replace(*ContentSourcePath, TEXT(""));
 		GenFileWithoutExt = GeneratedFileFolder + "/" + AssetName;
 	}
 
