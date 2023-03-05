@@ -2,7 +2,7 @@
 
 This is an Unreal Engine plugin that automatically generates C++ code bindings for UMG blueprint widgets and animations
 
-![Preview](Preview.gif)
+![Preview](Preview.webp)
 
 ## Notes
 

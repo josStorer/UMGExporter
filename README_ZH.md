@@ -2,7 +2,7 @@
 
 这是一个虚幻引擎插件, 用于为UMG蓝图的控件和动画自动生成c++代码绑定
 
-![Preview](Preview.gif)
+![Preview](Preview.webp)
 
 ## 注意事项
 
