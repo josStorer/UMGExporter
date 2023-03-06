@@ -66,7 +66,7 @@ void FUMGExporterModule::RegisterMenus()
 			if (ContextSensitiveObjects.Num() > 0)
 			{
 				UObject* CurrentObject = ContextSensitiveObjects[0];
-				if (CurrentObject && CurrentObject->IsAsset() && !CurrentObject->IsPendingKill())
+				if (IsValid(CurrentObject) && CurrentObject->IsAsset())
 				{
 					if (auto CurrentWidget = Cast<UWidgetBlueprint>(CurrentObject))
 					{
