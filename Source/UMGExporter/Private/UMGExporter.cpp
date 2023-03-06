@@ -61,12 +61,12 @@ void FUMGExporterModule::RegisterMenus()
 	AssetEditorToolBarExtenderDelegates.Add(FAssetEditorExtender::CreateLambda(
 		[this](const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects)
 		{
-			auto ToolbarExtender = MakeShared<FExtender, ESPMode::NotThreadSafe>();
+			auto ToolbarExtender = MakeShared<FExtender, ESPMode::ThreadSafe>();
 
 			if (ContextSensitiveObjects.Num() > 0)
 			{
 				UObject* CurrentObject = ContextSensitiveObjects[0];
-				if (CurrentObject && CurrentObject->IsAsset() && !CurrentObject->IsPendingKill())
+				if (IsValid(CurrentObject) && CurrentObject->IsAsset())
 				{
 					if (auto CurrentWidget = Cast<UWidgetBlueprint>(CurrentObject))
 					{
